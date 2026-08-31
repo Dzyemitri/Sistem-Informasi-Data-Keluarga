@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>SINK-GAS • Data Keluarga</title>
+
+  <!-- PWA Manifest & Meta Tags Standalone -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SINK-GAS">
+  <meta name="application-name" content="SINK-GAS">
+  <meta name="format-detection" content="telephone=no">
+
+  <!-- Favicon & Apple Touch Icon -->
+  <link rel="icon" type="image/png" href="https://cdn.phototourl.com/free/2026-08-31-09af5a08-5a0c-4cd8-b179-e607eeca20b3.png">
+  <link rel="apple-touch-icon" href="https://cdn.phototourl.com/free/2026-08-31-09af5a08-5a0c-4cd8-b179-e607eeca20b3.png">
+
+  <!-- Tailwind CSS & Font Awesome -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background-color: #0f172a;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      user-select: none;
+    }
+    .app-frame-container {
+      width: 100vw;
+      height: 100dvh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #0f172a;
+      position: relative;
+    }
+    #gasIframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #ffffff;
+      transition: opacity 0.3s ease;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); opacity: 0.95; }
+      50% { transform: scale(1.04); opacity: 1; filter: drop-shadow(0 0 20px rgba(14, 165, 233, 0.65)); }
+    }
+    .animate-glow {
+      animation: pulseGlow 2.2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-white flex flex-col">
+
+  <!-- Offline Network Banner -->
+  <div id="offlineBanner" class="hidden fixed top-0 left-0 right-0 z-50 bg-rose-600 text-white text-xs font-semibold py-2 px-4 flex items-center justify-between shadow-lg">
+    <div class="flex items-center space-x-2">
+      <i class="fa-solid fa-wifi-slash animate-pulse"></i>
+      <span>Mode Offline — Menghubungkan ulang...</span>
+    </div>
+    <span class="text-[10px] bg-rose-800 px-2 py-0.5 rounded-full font-mono">OFFLINE</span>
+  </div>
+
+  <!-- PWA Install Banner (Hanya muncul di peramban browser biasa) -->
+  <div id="installBanner" class="hidden fixed top-3 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-md bg-gradient-to-r from-sky-600 to-indigo-700 text-white p-3.5 rounded-2xl shadow-2xl flex items-center justify-between border border-sky-400/30 backdrop-blur-md">
+    <div class="flex items-center space-x-3">
+      <img 
+        src="https://cdn.phototourl.com/free/2026-08-31-09af5a08-5a0c-4cd8-b179-e607eeca20b3.png" 
+        alt="SINK-GAS Icon" 
+        class="w-10 h-10 rounded-xl object-contain bg-slate-900 p-0.5 shadow ring-2 ring-white/30 shrink-0"
+      >
+      <div>
+        <h4 class="font-bold text-xs leading-tight">Pasang SINK-GAS</h4>
+        <p class="text-[10px] text-sky-200">Layar penuh 100% tanpa bilah URL</p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2">
+      <button onclick="handleInstallClick()" class="bg-white text-sky-900 active:scale-95 font-bold text-xs px-3 py-1.5 rounded-xl shadow transition">
+        Instal
+      </button>
+      <button onclick="dismissBanner()" class="text-white/70 hover:text-white p-1 text-sm focus:outline-none">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Splash Screen & Loading -->
+  <div id="splashScreen" class="fixed inset-0 z-30 bg-gradient-to-b from-slate-950 via-slate-900 to-sky-950 flex flex-col items-center justify-between p-8 transition-opacity duration-500">
+    <div class="flex-1 flex flex-col items-center justify-center text-center">
+      <div class="w-24 h-24 rounded-3xl bg-slate-900/90 p-2 shadow-2xl shadow-sky-500/30 ring-4 ring-sky-500/20 mb-5 animate-glow flex items-center justify-center">
+        <img 
+          src="https://cdn.phototourl.com/free/2026-08-31-09af5a08-5a0c-4cd8-b179-e607eeca20b3.png" 
+          alt="SINK-GAS Logo" 
+          class="w-full h-full object-contain"
+        >
+      </div>
+      <h1 class="text-2xl font-black tracking-wide text-white">SINK-GAS</h1>
+      <p class="text-xs text-sky-300 font-medium mt-1">Sistem Informasi Data Keluarga Digital</p>
+      
+      <div class="mt-8 flex items-center space-x-2">
+        <div class="w-2 h-2 rounded-full bg-sky-400 animate-ping"></div>
+        <span id="loadingStatusText" class="text-xs text-slate-400 font-mono">Memuat Aplikasi...</span>
+      </div>
+    </div>
+
+    <div class="text-center text-[11px] text-slate-500 font-medium pb-4">
+      PWA Standalone App • Clean Edition
+    </div>
+  </div>
+
+  <!-- Main Full Screen Iframe Container -->
+  <main class="app-frame-container flex-1">
+    <iframe 
+      id="gasIframe" 
+      src="about:blank"
+      allow="clipboard-read; clipboard-write; geolocation; camera;"
+      sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-downloads"
+      class="opacity-0"
+    ></iframe>
+  </main>
+
+  <!-- Modal Petunjuk iOS Safari -->
+  <div id="iosGuideModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+        <h3 class="font-bold text-sm text-white flex items-center space-x-2">
+          <i class="fa-brands fa-apple text-sky-400 text-base"></i>
+          <span>Pasang di iPhone / iPad</span>
+        </h3>
+        <button onclick="closeIosModal()" class="text-slate-400 hover:text-white text-lg">&times;</button>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-300">
+        <div class="flex items-start space-x-3 p-3 bg-slate-950/60 rounded-xl border border-slate-800">
+          <span class="w-6 h-6 rounded-full bg-sky-600 text-white font-bold flex items-center justify-center text-xs shrink-0">1</span>
+          <p>Ketuk tombol <strong>Bagikan (Share)</strong> <i class="fa-solid fa-arrow-up-from-bracket text-sky-400 mx-1"></i> di bilah bawah Safari.</p>
+        </div>
+        <div class="flex items-start space-x-3 p-3 bg-slate-950/60 rounded-xl border border-slate-800">
+          <span class="w-6 h-6 rounded-full bg-sky-600 text-white font-bold flex items-center justify-center text-xs shrink-0">2</span>
+          <p>Gulir ke bawah dan pilih <strong>"Tambahkan ke Layar Utama"</strong> <i class="fa-regular fa-square-plus text-sky-400 mx-1"></i>.</p>
+        </div>
+        <div class="flex items-start space-x-3 p-3 bg-slate-950/60 rounded-xl border border-slate-800">
+          <span class="w-6 h-6 rounded-full bg-sky-600 text-white font-bold flex items-center justify-center text-xs shrink-0">3</span>
+          <p>Ketuk <strong>"Tambah" (Add)</strong> di pojok kanan atas. Buka aplikasi langsung dari Layar Utama HP Anda!</p>
+        </div>
+      </div>
+
+      <button onclick="closeIosModal()" class="w-full py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-xl shadow transition">
+        Mengerti
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbzgqbdrIn7B88GR7OB_5sLbQ6GaVWBJmKwCEkPFzv7Xe0sYQZ5NcF7DeIZblaOxA6L9sQ/exec";
+    const STORAGE_KEY = "SINK_GAS_URL_V2";
+    const PWA_DISMISSED_KEY = "SINK_PWA_BANNER_DISMISSED";
+
+    let deferredPrompt = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      registerServiceWorker();
+      initNetworkListeners();
+      initPWAInstall();
+      loadIframe();
+    });
+
+    /**
+     * Mendaftarkan berkas fisik sw.js
+     */
+    function registerServiceWorker() {
+      if ('serviceWorker' in navigator && window.isSecureContext) {
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => console.log('Service Worker terdaftar:', reg.scope))
+          .catch((err) => console.warn('Pendaftaran Service Worker:', err));
+      }
+    }
+
+    /**
+     * Memuat URL Google Apps Script ke dalam Fullscreen Iframe
+     */
+    function loadIframe() {
+      const savedUrl = localStorage.getItem(STORAGE_KEY) || DEFAULT_GAS_URL;
+      const iframe = document.getElementById("gasIframe");
+      const splash = document.getElementById("splashScreen");
+
+      if (iframe) {
+        iframe.src = savedUrl;
+        iframe.onload = () => {
+          iframe.classList.remove("opacity-0");
+          iframe.classList.add("opacity-100");
+          if (splash) {
+            splash.classList.add("opacity-0", "pointer-events-none");
+            setTimeout(() => splash.classList.add("hidden"), 500);
+          }
+        };
+
+        setTimeout(() => {
+          if (splash && !splash.classList.contains("hidden")) {
+            splash.classList.add("opacity-0", "pointer-events-none");
+            setTimeout(() => splash.classList.add("hidden"), 500);
+            iframe.classList.remove("opacity-0");
+          }
+        }, 3500);
+      }
+    }
+
+    function initNetworkListeners() {
+      const banner = document.getElementById("offlineBanner");
+      const updateStatus = () => {
+        if (!navigator.onLine) {
+          if (banner) banner.classList.remove("hidden");
+        } else {
+          if (banner) banner.classList.add("hidden");
+        }
+      };
+      window.addEventListener("online", updateStatus);
+      window.addEventListener("offline", updateStatus);
+      updateStatus();
+    }
+
+    function initPWAInstall() {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+      const isDismissed = sessionStorage.getItem(PWA_DISMISSED_KEY) === "true";
+
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        if (!isStandalone && !isDismissed) {
+          const banner = document.getElementById("installBanner");
+          if (banner) banner.classList.remove("hidden");
+        }
+      });
+
+      window.addEventListener("appinstalled", () => {
+        deferredPrompt = null;
+        dismissBanner();
+      });
+
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      if (isIOS && !isStandalone && !isDismissed) {
+        const banner = document.getElementById("installBanner");
+        if (banner) banner.classList.remove("hidden");
+      }
+    }
+
+    async function handleInstallClick() {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      if (isIOS) {
+        const modal = document.getElementById("iosGuideModal");
+        if (modal) modal.classList.remove("hidden");
+        return;
+      }
+
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === "accepted") {
+          dismissBanner();
+        }
+        deferredPrompt = null;
+      } else {
+        alert('Ketuk menu titik tiga (⋮) di browser Anda dan pilih "Instal Aplikasi" atau "Tambahkan ke Layar Utama".');
+      }
+    }
+
+    function dismissBanner() {
+      const banner = document.getElementById("installBanner");
+      if (banner) banner.classList.add("hidden");
+      sessionStorage.setItem(PWA_DISMISSED_KEY, "true");
+    }
+
+    function closeIosModal() {
+      const modal = document.getElementById("iosGuideModal");
+      if (modal) modal.classList.add("hidden");
+    }
+  </script>
+</body>
+</html>
