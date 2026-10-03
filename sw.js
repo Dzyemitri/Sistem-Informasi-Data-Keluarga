@@ -1,8 +1,9 @@
-const CACHE_NAME = 'sink-gas-pwa-v3';
+const CACHE_NAME = 'sink-gas-pwa-v4';
 const STATIC_ASSETS = [
   './',
   './index.html',
   './manifest.json',
+  './icon.svg',
   'https://cdn.tailwindcss.com',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
@@ -30,7 +31,6 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Hanya proses request GET yang valid
   if (event.request.method !== 'GET') return;
 
   // Lewati interception untuk script.google.com agar session & iframe berjalan lancar
