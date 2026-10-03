@@ -1,0 +1,11 @@
+<!-- Cyan Neon Gradient -->
+<linearGradient id="sinkCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+  <stop offset="0%" stop-color="#38bdf8"/>
+  <stop offset="100%" stop-color="#00d8f6"/>
+</linearGradient>
+
+<!-- Neon Glow Filter -->
+<filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+  <feGaussianBlur stdDeviation="2.5" result="blur" />
+  <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+</filter>
